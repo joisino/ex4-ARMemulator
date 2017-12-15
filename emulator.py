@@ -60,7 +60,7 @@ def main(stdscr):
     heap_it = 0
     mem = [0 for i in range(65536)]
 
-    history = [(copy.deepcopy(reg), instr_counter, pc, cmp_reg, heap_it, copy.deepcopy(mem))]
+    history = [(copy.deepcopy(reg), instr_counter, pc, cmp_reg, heap_it, None)]
 
     cur = None
         
@@ -136,6 +136,8 @@ def main(stdscr):
         for i, x in enumerate(ope):
             ope[i] = x.strip()
 
+        mem_change = None
+            
         if instr[0] == 'add':
             assert(len(ope) == 3)
             a = reg[ope[1]]        
@@ -190,6 +192,7 @@ def main(stdscr):
         elif instr[0] == 'str':
             assert(len(ope) == 2)
             a = get_addr(ope[1])
+            mem_change = (a//4, mem[a//4])
             mem[a//4] = reg[ope[0]]
             pc += 1
         elif instr[0] == 'sub':
@@ -206,7 +209,7 @@ def main(stdscr):
             reg['a1'] = cur_it
             pc = reg['lr']
 
-        history.append((copy.deepcopy(reg), instr_counter, pc, cmp_reg, heap_it, copy.deepcopy(mem)))
+        history.append((copy.deepcopy(reg), instr_counter, pc, cmp_reg, heap_it, mem_change))
 
         end = False
 
@@ -243,7 +246,9 @@ def main(stdscr):
                     break
                 elif cur is None and c == curses.KEY_LEFT:
                     if len(history) > 0:
-                        reg, instr_counter, pc, cmp_reg, heap_it, mem = history[-1]
+                        reg, instr_counter, pc, cmp_reg, heap_it, mem_change = history[-1]
+                        if mem_change is not None:
+                            mem[mem_change[0]] = mem_change[1]
                         history.pop(len(history)-1)
                 elif cur is None and c == ord(':'):
                     cur = 0
@@ -270,7 +275,8 @@ def main(stdscr):
     stdscr.refresh()
 
     r = 24
-    stdscr.addstr(r, 0, 'press q to quit')
+    stdscr.addstr(r, 0, 'the return value is %d' % reg['a1'])
+    stdscr.addstr(r+1, 0, 'press q to quit')
     
     while c != ord('q') :
         c = stdscr.getch()
