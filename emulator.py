@@ -275,7 +275,7 @@ def main(stdscr):
     stdscr.refresh()
 
     r = 24
-    stdscr.addstr(r, 0, 'the return value is %d' % reg['a1'])
+    stdscr.addstr(r, 0, 'the return value is %d, %d step(s)' % (reg['a1'], len(history)))
     stdscr.addstr(r+1, 0, 'press q to quit')
     
     while c != ord('q') :
